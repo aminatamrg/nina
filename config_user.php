@@ -1,92 +1,41 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Fiche de rendez-vous</title>
-	<meta charset="utf-8" />
-	<link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="css/styles.css">
-	<link rel="stylesheet" href="css/themes/theme-1.css" id="skin_color" />
-    <link rel="stylesheet" href="style_1"> 
-    <link rel="stylesheet" href="style_a"> 
+<?php
+if ((isset($_POST['email'])) && (isset($_POST['mot_passe']))) {
+    // mettre l'email et le mot de passe dans des variables
+    $email = $_POST['email'];
+    $mot_passe = $_POST['mot_passe'];
 
-    <style>
-      /* Styles pour la page */
-      body {
-        font-family: Arial, sans-serif;
-        background-color: #f0f0f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 50vh;
-        background-color: aquamarine;
-      }
-      /* Styles pour le formulaire */
-      form {
-        background-color: aqua;
-        padding: 70px;
-        margin: 80PX;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-      }
-      form label {
-        display: block;
-        margin-bottom: 10px;
-      }
-      form input[type="text"],
-      form input[type="date"],
-      form select,
-      form textarea {
-        width: 100%;
-        padding: 8px;
-        border-radius: 10px;
-        border: none;
-        margin-bottom: 20px;
-      }
-      form textarea {
-        height: 150px;
-      }
-      /* Styles pour les boutons */
-      button {
-        background-color: #333;
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-      }
-    </style>
-  </head>
-  <body>
+    // Informations d'identification
+    define('USER', 'root');
+    define('PASSWORD', '');
+    define('HOST', 'localhost');
+    define('DATABASE', 'aminata');
 
-      <form action="config_rv.php" method="POST">
-      <h1>Fiche de rendez-vous médical</h1>
-        <label for="nom">Nom :</label>
-        <input type="text" name="nom" placeholder="nom" required>
+    try {
+        // Connexion à la base de données MySQL
+        $connexion = new PDO("mysql:host=" . HOST . ";dbname=" . DATABASE, USER, PASSWORD);
 
-        <label for="prenom">Prénom :</label>
-        <input type="text" name="prenom" placeholder="prenom" required>
+        // Définir le mode d'erreur de PDO sur Exception
+        $connexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }  catch (PDOException $e) {
+        echo "Erreur de connexion à la base de données : " . $e->getMessage();
+    }
 
-        <label for="date">Date :</label>
-        <input type="date"  name="daate" required>
+        // Requête préparée pour éviter les attaques par injection SQL
+        $req = $connexion->prepare("SELECT * FROM patient WHERE email = :email ");
+        $req->bindParam(':email', $email);
+        $req->execute();
+        $res = $req->fetch(PDO::FETCH_ASSOC);
 
-        <label for="heure">Heure :</label>
-        <select id="heure" name="heure" required>
-          <option value="">-- Choisissez une heure --</option>
-          <option value="08h00">08:00:00:</option>
-          <option value="09h00">09:00:00</option>
-          <option value="10h00">10:00:00</option>
-          <option value="11h00">11:00:00</option>
-          <option value="14h00">14:00:00</option>
-          <option value="15h00">15:00:00</option>
-          <option value="16h00">16:00:00</option>
-          <option value="17h00">17:00:00</option>
-        </select>
-
-        <label for="motif">Motif :</label>
-        <textarea id="motif" name="motif" required></textarea>
-
-        <input type="submit" name="submit" value="Enregistrer">
-      </form>
-    </div>
-  </body>
-</html>
+        // Vérification du mot de passe en utilisant password_verify
+        if ($res) {
+            $passwordHach = $res['mot_passe'];
+            if (password_verify($mot_passe, $passwordHach)) {
+                // Redirection vers une autre page après une authentification réussie
+                header("Location: Accueil_user.php");
+                exit(); // Ajouter cette instruction pour arrêter l'exécution du script
+            } else {
+                echo '<a href="user-login.php">Email ou Mot de passe incorrect.</a>'; // au cas où la connexion échoue
+            }
+}
+}
+?>

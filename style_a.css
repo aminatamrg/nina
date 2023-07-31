@@ -1,0 +1,30 @@
+header {
+	background-color: #4CAF50;
+	color: white;
+	padding: 50px;
+}
+
+nav ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+nav li {
+	display: inline-block;
+	margin-right: 20px;
+}
+
+nav li a {
+	color: white;
+	text-decoration: none;
+}
+
+/* Styles pour le main */
+main {
+	margin: 20px;
+}
+
+h2 {
+	margin-top: 40px;
+}
